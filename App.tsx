@@ -28,6 +28,7 @@ function App() {
   const [endTime, setEndTime] = React.useState<Dayjs | null>(dayjs('2024-2-16T24:00'));
   const inputDate=dayjs(inputDay).format("MM/DD")
 
+  
   const handleClick= async ()=>{
     const inputDate=dayjs(inputDay).format("MM/DD")
     const inputStartTime=dayjs(startTime).format("HH:mm")
@@ -125,12 +126,11 @@ function App() {
   }, [carNo, inputDay]);
 
 
-  const carNos=[
-    "11号車(3384)",
-    "12号車(3386)",
-    "13号車(3389)"
-  ]
-
+  const carNos={
+    name1:"11号車(3384)",
+    neme2:"12号車(3386)",
+    name3:"13号車(3389)",
+  }
   
   return (
 
@@ -212,9 +212,9 @@ function App() {
             <Grid item sm={1}/>
 
 
-          {carNos.map((cars)=>(
-              <Grid item sm={3}>
-                <h1>{carNo}</h1>
+            {Object.entries(carNos).map(([key, value])=>(
+              <Grid item sm={3} key="carNos">
+                <h1>{value}</h1>
                 <table>
                   <thead>
                     <tr>
