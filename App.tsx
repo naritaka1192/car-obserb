@@ -33,14 +33,53 @@ function App() {
     const inputStartTime=dayjs(startTime).format("HH:mm")
     const inputEndTime=dayjs(endTime).format("HH:mm")
 
-    // const id = data.length.toString()
+    console.log(data)
+    const listData={
+      carNo:carNo,
+      obserbDay:inputDate,
+      obserbTime:inputStartTime,
+      obserbTime2:inputEndTime,    
+  }
 
-  const listData={
-    carNo:carNo,
-    obserbDay:inputDate,
-    obserbTime:inputStartTime,
-    obserbTime2:inputEndTime,    
-}
+  // // デバッグ目的でdataの内容を出力
+  // data.forEach((item, index) => {
+  //   // データ配列内の各要素とその時間を確認する
+  //   console.log(`data[${index}].obserbTime:`, item.data.obserbTime,inputStartTime);
+  // });
+  if(inputStartTime==inputEndTime){
+    alert("開始時間と終了時間が同じです")
+    return false
+  }
+
+  if(inputStartTime>inputEndTime){
+    alert("開始時間と終了時間が逆転しています")
+    return false
+  }
+
+  const findStarttime = data.find(item => {
+    return (item.data.obserbTime < inputStartTime) && (item.data.obserbTime2 > inputStartTime) }); //開始時間がstart,endの間にある
+  const findEndtime = data.find(item=>{
+    return (item.data.obserbTime < inputEndTime) && (item.data.obserbTime2 > inputEndTime) }); //終了時間がstart,endの間にある
+  const findtime1 = data.find(item=>{
+    return (item.data.obserbTime > inputStartTime) && (item.data.obserbTime2 < inputEndTime) }); 
+                                                                          //開始時間がstartの前に、終了時間がendの後にある
+  const findtime2 = data.find(item=>{
+    return (item.data.obserbTime > inputEndTime) && (item.data.obserbTime2 < inputStartTime) }); 
+                                                                           //開始時間がendの後に、終了時間がstartの前にある
+  const findtime3 = data.find(item=>{
+    return (item.data.obserbTime == inputStartTime) && (item.data.obserbTime2  == inputEndTime) }); 
+                                                                            //開始時間とstartと、終了時間がendと一緒
+
+
+  if (findStarttime||findEndtime||findtime1||findtime2||findtime3) {
+    console.log("Found match:", findStarttime,findEndtime); // 一致した場合のログ
+    alert("タイムエラー");
+    return false
+  } else {
+    console.log("No match found."); // 一致しない場合のログ
+  }
+
+    // const id = data.length.toString()
 
     await addDoc(collection(db,"cars"),{
       carNo:carNo,
@@ -67,7 +106,7 @@ function App() {
   }
 
   const deleteClick=async(id:string)=>{
-    alert(id)
+    // alert(id)
     const numericId=parseInt(id,10);
     await deleteDoc(doc(db,"cars",id));
     const deleteData = data.filter((data)=>data.id !==id);
@@ -85,7 +124,14 @@ function App() {
     })();
   }, [carNo, inputDay]);
 
-   
+
+  const carNos=[
+    "11号車(3384)",
+    "12号車(3386)",
+    "13号車(3389)"
+  ]
+
+  
   return (
 
     <Grid className="grd" container direction="column">
@@ -163,10 +209,10 @@ function App() {
             <h1>{inputDate}</h1>
             </Grid>
             <Grid item container>
-
-
-
             <Grid item sm={1}/>
+
+
+          {carNos.map((cars)=>(
               <Grid item sm={3}>
                 <h1>{carNo}</h1>
                 <table>
@@ -197,13 +243,10 @@ function App() {
                 )}
               </div>
               </Grid>
-
-
-
+                  ))}
             </Grid>
           </Grid>
          </div>  
-
       </Grid>
   );
 }
