@@ -259,4 +259,3 @@ export default App;
 // function doc(db: Firestore, arg1: string, id: any) {
 //   throw new Error('Function not implemented.');
 // }
-
