@@ -1,5 +1,5 @@
 import {useState,useEffect} from 'react';
-import Appbar from './component/Appbar';
+import Appbar from './components/Appbar';
 import Grid from '@mui/material/Grid';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
@@ -28,7 +28,13 @@ function App() {
   const [endTime, setEndTime] = React.useState<Dayjs | null>(dayjs('2024-2-16T24:00'));
   const inputDate=dayjs(inputDay).format("MM/DD")
 
-  
+  const carNos={
+    name1:"11号車(3384)",
+    neme2:"12号車(3386)",
+    name3:"13号車(3389)",
+  }
+
+
   const handleClick= async ()=>{
     const inputDate=dayjs(inputDay).format("MM/DD")
     const inputStartTime=dayjs(startTime).format("HH:mm")
@@ -92,14 +98,33 @@ function App() {
     const list=[...data];
     setData(list)
 
+    // const usersRef = collection(db, "cars");
+    // const q = query(usersRef,where("carNo", "==", carNo),
+    // where("obserbDay", "==", inputDate));
+
     const usersRef = collection(db, "cars");
-    const q = query(usersRef,where("carNo", "==", carNo),
-    where("obserbDay", "==", inputDate));
-    
+    const q = query(usersRef,where("obserbDay", "==", inputDate));
+
     const querySnapshot = await getDocs(q);
     const newData = querySnapshot.docs.map((doc) => (
       { id: doc.id, data: doc.data()}));
-    setData(newData);
+    
+    console.log(newData)
+
+    const filterQuerys=newData.filter(filterQuery=>{
+      return filterQuery.data.carNo == "11号車(3384)"
+    })
+    setData(filterQuerys);
+
+    const filterQuerys2=newData.filter(filterQuery=>{
+      return filterQuery.data.carNo == "12号車(3386)"
+    })
+    setData(filterQuerys2);
+
+    const filterQuerys3=newData.filter(filterQuery=>{
+      return filterQuery.data.carNo == "13号車(3389)"
+    })
+    setData(filterQuerys3);
   };
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -126,11 +151,7 @@ function App() {
   }, [carNo, inputDay]);
 
 
-  const carNos={
-    name1:"11号車(3384)",
-    neme2:"12号車(3386)",
-    name3:"13号車(3389)",
-  }
+
   
   return (
 
@@ -139,7 +160,10 @@ function App() {
         <Appbar />
       </Grid>
       <div className="App">
+      <p></p>
+
       <Grid item container spacing={2}>
+
         <Grid item sm={3}/>
         <Grid item sm={1.2}>
               <Select
@@ -259,5 +283,3 @@ export default App;
 // function doc(db: Firestore, arg1: string, id: any) {
 //   throw new Error('Function not implemented.');
 // }
-
-
