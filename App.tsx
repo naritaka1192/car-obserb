@@ -1,5 +1,5 @@
 import {useState,useEffect} from 'react';
-import Appbar from './components/Appbar';
+import Appbar from './component/Appbar';
 import Grid from '@mui/material/Grid';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
@@ -28,13 +28,7 @@ function App() {
   const [endTime, setEndTime] = React.useState<Dayjs | null>(dayjs('2024-2-16T24:00'));
   const inputDate=dayjs(inputDay).format("MM/DD")
 
-  const carNos={
-    name1:"11号車(3384)",
-    neme2:"12号車(3386)",
-    name3:"13号車(3389)",
-  }
-
-
+  
   const handleClick= async ()=>{
     const inputDate=dayjs(inputDay).format("MM/DD")
     const inputStartTime=dayjs(startTime).format("HH:mm")
@@ -53,38 +47,38 @@ function App() {
   //   // データ配列内の各要素とその時間を確認する
   //   console.log(`data[${index}].obserbTime:`, item.data.obserbTime,inputStartTime);
   // });
-  if(inputStartTime==inputEndTime){
-    alert("開始時間と終了時間が同じです")
-    return false
-  }
+  // if(inputStartTime==inputEndTime){
+  //   alert("開始時間と終了時間が同じです")
+  //   return false
+  // }
 
-  if(inputStartTime>inputEndTime){
-    alert("開始時間と終了時間が逆転しています")
-    return false
-  }
+  // if(inputStartTime>inputEndTime){
+  //   alert("開始時間と終了時間が逆転しています")
+  //   return false
+  // }
 
-  const findStarttime = data.find(item => {
-    return (item.data.obserbTime < inputStartTime) && (item.data.obserbTime2 > inputStartTime) }); //開始時間がstart,endの間にある
-  const findEndtime = data.find(item=>{
-    return (item.data.obserbTime < inputEndTime) && (item.data.obserbTime2 > inputEndTime) }); //終了時間がstart,endの間にある
-  const findtime1 = data.find(item=>{
-    return (item.data.obserbTime > inputStartTime) && (item.data.obserbTime2 < inputEndTime) }); 
-                                                                          //開始時間がstartの前に、終了時間がendの後にある
-  const findtime2 = data.find(item=>{
-    return (item.data.obserbTime > inputEndTime) && (item.data.obserbTime2 < inputStartTime) }); 
-                                                                           //開始時間がendの後に、終了時間がstartの前にある
-  const findtime3 = data.find(item=>{
-    return (item.data.obserbTime == inputStartTime) && (item.data.obserbTime2  == inputEndTime) }); 
-                                                                            //開始時間とstartと、終了時間がendと一緒
+  // const findStarttime = data.find(item => {
+  //   return (item.data.obserbTime < inputStartTime) && (item.data.obserbTime2 > inputStartTime) }); //開始時間がstart,endの間にある
+  // const findEndtime = data.find(item=>{
+  //   return (item.data.obserbTime < inputEndTime) && (item.data.obserbTime2 > inputEndTime) }); //終了時間がstart,endの間にある
+  // const findtime1 = data.find(item=>{
+  //   return (item.data.obserbTime > inputStartTime) && (item.data.obserbTime2 < inputEndTime) }); 
+  //                          //開始時間がstartの前に、終了時間がendの後にある
+  // const findtime2 = data.find(item=>{
+  //   return (item.data.obserbTime > inputEndTime) && (item.data.obserbTime2 < inputStartTime) }); 
+  //                         //開始時間がendの後に、終了時間がstartの前にある
+  // const findtime3 = data.find(item=>{
+  //   return (item.data.obserbTime == inputStartTime) && (item.data.obserbTime2  == inputEndTime) }); 
+  //                                                                           //開始時間とstartと、終了時間がendと一緒
 
 
-  if (findStarttime||findEndtime||findtime1||findtime2||findtime3) {
-    console.log("Found match:", findStarttime,findEndtime); // 一致した場合のログ
-    alert("タイムエラー");
-    return false
-  } else {
-    console.log("No match found."); // 一致しない場合のログ
-  }
+  // if (findStarttime||findEndtime||findtime1||findtime2||findtime3) {
+  //   console.log("Found match:", findStarttime,findEndtime); // 一致した場合のログ
+  //   alert("タイムエラー");
+  //   return false
+  // } else {
+  //   console.log("No match found."); // 一致しない場合のログ
+  // }
 
     // const id = data.length.toString()
 
@@ -98,34 +92,20 @@ function App() {
     const list=[...data];
     setData(list)
 
-    // const usersRef = collection(db, "cars");
-    // const q = query(usersRef,where("carNo", "==", carNo),
-    // where("obserbDay", "==", inputDate));
-
     const usersRef = collection(db, "cars");
-    const q = query(usersRef,where("obserbDay", "==", inputDate));
-
+    const q = query(usersRef,where("carNo", "==", carNo),
+    where("obserbDay", "==", inputDate));
+    
     const querySnapshot = await getDocs(q);
     const newData = querySnapshot.docs.map((doc) => (
       { id: doc.id, data: doc.data()}));
-    
-    console.log(newData)
-
-    const filterQuerys=newData.filter(filterQuery=>{
-      return filterQuery.data.carNo == "11号車(3384)"
-    })
-    setData(filterQuerys);
-
-    const filterQuerys2=newData.filter(filterQuery=>{
-      return filterQuery.data.carNo == "12号車(3386)"
-    })
-    setData(filterQuerys2);
-
-    const filterQuerys3=newData.filter(filterQuery=>{
-      return filterQuery.data.carNo == "13号車(3389)"
-    })
-    setData(filterQuerys3);
+    setData(newData);
   };
+
+  useEffect(() => {
+    handleClick();
+  }, [inputDate]);
+
 
   const handleChange = (event: SelectChangeEvent) => {
     setCarNo(event.target.value as string);
@@ -151,7 +131,11 @@ function App() {
   }, [carNo, inputDay]);
 
 
-
+  const carNos={
+    name1:"11号車(3384)",
+    name2:"12号車(3386)",
+    name3:"13号車(3389)",
+  }
   
   return (
 
@@ -160,10 +144,7 @@ function App() {
         <Appbar />
       </Grid>
       <div className="App">
-      <p></p>
-
       <Grid item container spacing={2}>
-
         <Grid item sm={3}/>
         <Grid item sm={1.2}>
               <Select
@@ -252,13 +233,20 @@ function App() {
                 {data && (
                   <div>
                     <table>
-                      <tbody>
-                    {data.map((item) => (
-                      <tr key={item.data.id}>
-                        <td>　{item.data.obserbTime}</td>
-                        <td>　　 {item.data.obserbTime2}</td>
-                        <td><Button size="large" variant="contained" color="success" 
-                        onClick={()=>deleteClick(item.id)}>削除</Button></td>
+                    <tbody>
+            {data
+              .filter((item) => item.data.carNo === value)
+              .map((filteredItem) => (
+                <tr key={filteredItem.id}>
+                  <td>{filteredItem.data.obserbTime}</td>
+                  <td>{filteredItem.data.obserbTime2}</td>
+                  <td>
+                    <Button
+                      size="large"
+                      variant="contained"
+                      color="success"
+                      onClick={() => deleteClick(filteredItem.id)}
+                    >削除</Button></td>
                       </tr>
                       ))}
                       </tbody>
@@ -283,3 +271,4 @@ export default App;
 // function doc(db: Firestore, arg1: string, id: any) {
 //   throw new Error('Function not implemented.');
 // }
+
