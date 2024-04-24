@@ -22,6 +22,8 @@ function App() {
   
   const [carNo, setCarNo] = useState('11号車(3384)');
   const [data, setData] = useState<any[]>([]);
+  const [data2, setData2] = useState<any[]>([]);
+
   
   const [inputDay, setInputDay] = React.useState<Dayjs | null>(dayjs(today));
   const [startTime, setStartTime] = React.useState<Dayjs | null>(dayjs('2024-2-16T24:00'));
@@ -34,19 +36,6 @@ function App() {
     const inputStartTime=dayjs(startTime).format("HH:mm")
     const inputEndTime=dayjs(endTime).format("HH:mm")
 
-    console.log(data)
-    const listData={
-      carNo:carNo,
-      obserbDay:inputDate,
-      obserbTime:inputStartTime,
-      obserbTime2:inputEndTime,    
-  }
-
-  // // デバッグ目的でdataの内容を出力
-  // data.forEach((item, index) => {
-  //   // データ配列内の各要素とその時間を確認する
-  //   console.log(`data[${index}].obserbTime:`, item.data.obserbTime,inputStartTime);
-  // });
   // if(inputStartTime==inputEndTime){
   //   alert("開始時間と終了時間が同じです")
   //   return false
@@ -63,10 +52,10 @@ function App() {
   //   return (item.data.obserbTime < inputEndTime) && (item.data.obserbTime2 > inputEndTime) }); //終了時間がstart,endの間にある
   // const findtime1 = data.find(item=>{
   //   return (item.data.obserbTime > inputStartTime) && (item.data.obserbTime2 < inputEndTime) }); 
-  //                          //開始時間がstartの前に、終了時間がendの後にある
+  //                                                                         //開始時間がstartの前に、終了時間がendの後にある
   // const findtime2 = data.find(item=>{
   //   return (item.data.obserbTime > inputEndTime) && (item.data.obserbTime2 < inputStartTime) }); 
-  //                         //開始時間がendの後に、終了時間がstartの前にある
+  //                                                                          //開始時間がendの後に、終了時間がstartの前にある
   // const findtime3 = data.find(item=>{
   //   return (item.data.obserbTime == inputStartTime) && (item.data.obserbTime2  == inputEndTime) }); 
   //                                                                           //開始時間とstartと、終了時間がendと一緒
@@ -80,8 +69,6 @@ function App() {
   //   console.log("No match found."); // 一致しない場合のログ
   // }
 
-    // const id = data.length.toString()
-
     await addDoc(collection(db,"cars"),{
       carNo:carNo,
       obserbDay:inputDate,
@@ -91,20 +78,31 @@ function App() {
     
     const list=[...data];
     setData(list)
+    console.log("fdfd",data)
 
     const usersRef = collection(db, "cars");
-    const q = query(usersRef,where("carNo", "==", carNo),
-    where("obserbDay", "==", inputDate));
+    const q = query(usersRef,where("obserbDay", "==", inputDate));
+  
     
+
     const querySnapshot = await getDocs(q);
     const newData = querySnapshot.docs.map((doc) => (
       { id: doc.id, data: doc.data()}));
-    setData(newData);
+
+    const filterCar1 = newData.filter(car1=>{
+      return car1.data.carNo == "11号車(3384)"
+    })
+    setData(filterCar1);
+
+    const filterCar2 = newData.filter(car2=>{
+      return car2.data.carNo == "12号車(3386)"
+    })
+    setData2(filterCar2);
+
+
   };
 
-  useEffect(() => {
-    handleClick();
-  }, [inputDate]);
+
 
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -119,23 +117,42 @@ function App() {
     setData(deleteData)
   }
  
+  const deleteClick2=async(id:string)=>{
+    // alert(id)
+    const numericId=parseInt(id,10);
+    await deleteDoc(doc(db,"cars",id));
+    const deleteData = data2.filter((data)=>data.id !==id);
+    setData2(deleteData)
+  }
+
+
+
   useEffect(() => {
     (async () => {
       const inputDate = dayjs(inputDay).format("MM/DD"); 
       const usersRef = collection(db, "cars");
-      const q = query(usersRef, where("carNo", "==", carNo), where("obserbDay", "==", inputDate));
+      const q = query(usersRef,where("obserbDay", "==", inputDate));
       const querySnapshot = await getDocs(q);
       const newData = querySnapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() }));
-      setData(newData);
+      const filterCar1 = newData.filter(car1=>{
+
+        return car1.data.carNo == "11号車(3384)"
+      })
+      setData(filterCar1);
+  
+      const filterCar2 = newData.filter(car2=>{
+        return car2.data.carNo == "12号車(3386)"
+      })
+      setData2(filterCar2);
     })();
   }, [carNo, inputDay]);
 
 
-  const carNos={
-    name1:"11号車(3384)",
-    name2:"12号車(3386)",
-    name3:"13号車(3389)",
-  }
+  // const carNos={
+  //   name1:"11号車(3384)",
+  //   neme2:"12号車(3386)",
+  //   name3:"13号車(3389)",
+  // }
   
   return (
 
@@ -217,14 +234,14 @@ function App() {
             <Grid item sm={1}/>
 
 
-            {Object.entries(carNos).map(([key, value])=>(
-              <Grid item sm={3} key="carNos">
-                <h1>{value}</h1>
+              <Grid item sm={2.5} key="carNo">
+                <h2>11号車(3384)</h2>
                 <table>
                   <thead>
                     <tr>
-                      <th>使用開始</th>
-                      <th>　使用終了</th>
+                      <th>開始</th>
+                      <th>  ～</th>
+                      <th> 終了</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -233,20 +250,14 @@ function App() {
                 {data && (
                   <div>
                     <table>
-                    <tbody>
-            {data
-              .filter((item) => item.data.carNo === value)
-              .map((filteredItem) => (
-                <tr key={filteredItem.id}>
-                  <td>{filteredItem.data.obserbTime}</td>
-                  <td>{filteredItem.data.obserbTime2}</td>
-                  <td>
-                    <Button
-                      size="large"
-                      variant="contained"
-                      color="success"
-                      onClick={() => deleteClick(filteredItem.id)}
-                    >削除</Button></td>
+                      <tbody>
+                    {data.map((item) => (
+                      <tr key={item.data.id}>
+                        <td>{item.data.obserbTime}</td>
+                        <td>～</td>
+                        <td>{item.data.obserbTime2}</td>
+                        <td><Button size="large" variant="contained" color="success" 
+                        onClick={()=>deleteClick(item.id)}>削除</Button></td>
                       </tr>
                       ))}
                       </tbody>
@@ -255,7 +266,39 @@ function App() {
                 )}
               </div>
               </Grid>
-                  ))}
+
+              <Grid item sm={2.5} key="carNo">
+                <h2>12号車(3386)</h2>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>開始</th>
+                      <th>  ～</th>
+                      <th> 終了</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                </table>
+              <div>
+                {data2 && (
+                  <div>
+                    <table>
+                      <tbody>
+                    {data2.map((item) => (
+                      <tr key={item.data.id}>
+                        <td>{item.data.obserbTime}</td>
+                        <td>～</td>
+                        <td>{item.data.obserbTime2}</td>
+                        <td><Button size="large" variant="contained" color="success" 
+                        onClick={()=>deleteClick2(item.id)}>削除</Button></td>
+                      </tr>
+                      ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+              </Grid>
             </Grid>
           </Grid>
          </div>  
@@ -264,11 +307,3 @@ function App() {
 }
 
 export default App;
-// function setCarNo(arg0: string) {
-//   throw new Error('Function not implemented.');
-// }
-
-// function doc(db: Firestore, arg1: string, id: any) {
-//   throw new Error('Function not implemented.');
-// }
-
