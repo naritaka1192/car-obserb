@@ -31,7 +31,7 @@ interface ObservationData {
 function App() { 
   const today = new Date();
   
-  const [carNo, setCarNo] = useState('11号車');
+  const [carNo, setCarNo] = useState('11号車(1111)');
   const [data, setData] = useState<any[][]>([]);
 
   
@@ -41,7 +41,7 @@ function App() {
   const inputDate=dayjs(inputDay).format("MM/DD")
 
 
-    const cars=["11号車","12号車","13号車"]
+    const cars=["11号車(1111)","12号車(2222)","13号車(3333)"]
  
   const handleClick= async ()=>{
     const inputDate=dayjs(inputDay).format("MM/DD")
@@ -87,8 +87,6 @@ function App() {
       obserbTime2:inputEndTime,
     })
     
-
-
     const usersRef = collection(db, "cars");
     const q = query(usersRef,where("obserbDay", "==", inputDate));
   
@@ -169,9 +167,9 @@ function App() {
                 label="carNo"
                 onChange={handleChange}
               >
-                <MenuItem value={"11号車"}>11号車</MenuItem>
-                <MenuItem value={"12号車"}>12号車</MenuItem>
-                <MenuItem value={"13号車"}>13号車</MenuItem>
+                <MenuItem value={"11号車(1111)"}>11号車(1111)</MenuItem>
+                <MenuItem value={"12号車(2222)"}>12号車(2222)</MenuItem>
+                <MenuItem value={"13号車(3333)"}>13号車(3333)</MenuItem>
             </Select>
           </Grid>
           <Grid item sm={2}>
@@ -228,9 +226,9 @@ function App() {
             <Grid item sm={1}/>
             <h1>{inputDate}</h1>
             </Grid>
+
             <Grid item container>
             <Grid item sm={1}/>
-
              {data.map((all)=>{
               return all.map((item)=>{
                 return<p>{item.carNo}</p>;
@@ -238,9 +236,8 @@ function App() {
             })}
 
               {data.map((carData, Index) => (
-                
               <Grid item sm={2.5}>
-                    {carNo}
+                    <h2>{cars[Index]}</h2>
                       <div key={Index}> 
                         {carData.map((item) => (
                           <tr key={item.data.id}>
@@ -264,3 +261,4 @@ function App() {
 }
 
 export default App;
+
