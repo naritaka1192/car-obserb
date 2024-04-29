@@ -26,8 +26,6 @@ interface ObservationData {
   obserbTime2: string;
 }
 
-
-
 function App() { 
   const today = new Date();
   
@@ -41,7 +39,7 @@ function App() {
   const inputDate=dayjs(inputDay).format("MM/DD")
 
 
-    const cars=["11号車(1111)","12号車(2222)","13号車(3333)"]
+  const cars=["11号車(1111)","12号車(2222)","13号車(3333)"]
  
   const handleClick= async ()=>{
     const inputDate=dayjs(inputDay).format("MM/DD")
@@ -58,34 +56,31 @@ function App() {
   //   alert("開始時間と終了時間が逆転しています")
   //   return false
   // }
+  
+  const isCarFound = data.some(carArray => {
+    const findStartTime = carArray.find(carItem => carItem.data.obserbTime == inputStartTime && carItem.data.carNo == carNo);
+    if (findStartTime) {
+      alert("エラー: 一致する要素が見つかりました");
+      return true; // 条件に一致する要素が見つかったので、some()メソッドの処理を停止します
+    }
+    return false; // 条件に一致する要素が見つからなかったので、処理を続けます
+  });
+  
+  if (isCarFound) {
+    console.log("ループを終了しました");
+    return false
+  } else {
+    console.log("一致する要素は見つかりませんでした");
+  }
+  
+  const carDetail={
+    carNo:carNo,
+    obserbDay:inputDate,
+    obserbTime:inputStartTime,
+    obserbTime2:inputEndTime,
+  }
 
-  // const findStarttime = data.find(item => {
-  //   return (item.data.obserbTime < inputStartTime) && (item.data.obserbTime2 > inputStartTime) });
-  //            //開始時間がstart,endの間にある
-  // const findEndtime = data.find(item=>{
-  //   return (item.data.obserbTime < inputEndTime) && (item.data.obserbTime2 > inputEndTime) }); 
-  //           //終了時間がstart,endの間にある
-  // const findtime1 = data.find(item=>{
-  //   return (item.data.obserbTime > inputStartTime) && (item.data.obserbTime2 < inputEndTime) }); 
-  //           //開始時間がstartの前に、終了時間がendの後にある
-  // const findtime2 = data.find(item=>{
-  //   return (item.data.obserbTime == inputStartTime) && (item.data.obserbTime2  == inputEndTime) }); 
-  //           //開始時間とstartと、終了時間がendと一緒
-
-  // if (findStarttime||findEndtime||findtime1||findtime2) {
-  //   console.log("Found match:", findStarttime,findEndtime); // 一致した場合のログ
-  //   alert("タイムエラー");
-  //   return false
-  // } else {
-  //   console.log("No match found."); // 一致しない場合のログ
-  // }
-
-    await addDoc(collection(db,"cars"),{
-      carNo:carNo,
-      obserbDay:inputDate,
-      obserbTime:inputStartTime,
-      obserbTime2:inputEndTime,
-    })
+    await addDoc(collection(db,"cars"),carDetail)
     
     const usersRef = collection(db, "cars");
     const q = query(usersRef,where("obserbDay", "==", inputDate));
@@ -103,33 +98,24 @@ function App() {
         filteredCars.push(filteredData);
       }
 
-      console.log(filteredCars)
+      // console.log(filteredCars)
       setData(filteredCars)
   };
-
-
 
   const handleChange = (event: SelectChangeEvent) => {
     setCarNo(event.target.value as string);
   }
 
-  // const deleteClick=async(id:string)=>{
-  //   await deleteDoc(doc(db,"cars",id));
-  //   const deleteData = data.filter(data=>data.id !==id);
-  //   setData(deleteData)
-  // }
- 
   const deleteClick = async (id: string) => {
     await deleteDoc(doc(db, "cars", id)); // Firebaseからの削除
-    const newFilteredData = data.map(innerArray => 
+      //arrayの場合はmapをかけてデータを取り出し、その中で1つ1つフィルターをかけていく(編集も同じ)
+    const newFilteredData = data.map(innerArray =>   
       innerArray.filter(item => item.id !== id)
     );
     
     setData(newFilteredData);
   };
   
-
-
   useEffect(() => {
       (async () => {
         const inputDate = dayjs(inputDay).format("MM/DD"); 
