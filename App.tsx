@@ -47,26 +47,80 @@ function App() {
     const inputEndTime=dayjs(endTime).format("HH:mm")
 
     
-  // if(inputStartTime==inputEndTime){
-  //   alert("開始時間と終了時間が同じです")
-  //   return false
-  // }
+  if(inputStartTime==inputEndTime){
+    alert("開始時間と終了時間が同じです")
+    return false
+  }
 
-  // if(inputStartTime>inputEndTime){
-  //   alert("開始時間と終了時間が逆転しています")
-  //   return false
-  // }
+  if(inputStartTime>inputEndTime){
+    alert("開始時間と終了時間が逆転しています")
+    return false
+  }
   
+  //array someを使ってエラーが出たらその場で終了のを作った
   const isCarFound = data.some(carArray => {
-    const findStartTime = carArray.find(carItem => carItem.data.obserbTime == inputStartTime && carItem.data.carNo == carNo);
+    const findStartTime = 
+          carArray.find(carItem =>
+                 carItem.data.obserbTime <= inputStartTime &&
+                  carItem.data.obserbTime2 > inputStartTime &&
+                   carItem.data.carNo == carNo);
+                   //開始時間がすでにある開始時間と終了時間の間にある場合
+     
+                   
     if (findStartTime) {
-      alert("エラー: 一致する要素が見つかりました");
+      alert("エラー: 開始時間がおかしいですよ");
+      return true; // 条件に一致する要素が見つかったので、some()メソッドの処理を停止します
+    }
+      return false; // 条件に一致する要素が見つからなかったので、処理を続けます
+  });
+
+  if (isCarFound) {
+    console.log("ループを終了しました");
+    return false
+  } else {
+    console.log("一致する要素は見つかりませんでした");
+  }
+
+  const isCarFound2 = data.some(carArray => {
+    const findEndTime = 
+          carArray.find(carItem =>
+                 carItem.data.obserbTime < inputEndTime &&
+                  carItem.data.obserbTime2 >= inputEndTime &&
+                   carItem.data.carNo == carNo);
+                   //終了時間がすでにある開始時間と終了時間の間にある場合
+     
+                   
+    if (findEndTime) {
+      alert("エラー: 終了時間がおかしいですよ");
       return true; // 条件に一致する要素が見つかったので、some()メソッドの処理を停止します
     }
     return false; // 条件に一致する要素が見つからなかったので、処理を続けます
   });
-  
-  if (isCarFound) {
+  if (isCarFound2) {
+    console.log("ループを終了しました");
+    return false
+  } else {
+    console.log("一致する要素は見つかりませんでした");
+  }
+
+  const isCarFound3 = data.some(carArray => {
+    const findbetweenTime = 
+          carArray.find(carItem =>
+                 carItem.data.obserbTime >= inputStartTime &&
+                  carItem.data.obserbTime2 <= inputEndTime &&
+                   carItem.data.carNo == carNo);
+                   //開始時間と終了時間ですでにある開始時間と終了時間を挟む場合
+     
+                   
+    if (findbetweenTime) {
+      alert("エラー: 開始時間がなんかおかしいですねぇ");
+      return true; // 条件に一致する要素が見つかったので、some()メソッドの処理を停止します
+    }
+    return false; // 条件に一致する要素が見つからなかったので、処理を続けます
+  });
+
+
+  if (isCarFound3) {
     console.log("ループを終了しました");
     return false
   } else {
@@ -78,6 +132,7 @@ function App() {
     obserbDay:inputDate,
     obserbTime:inputStartTime,
     obserbTime2:inputEndTime,
+    userName:"成田"
   }
 
     await addDoc(collection(db,"cars"),carDetail)
@@ -89,17 +144,29 @@ function App() {
     const newData = querySnapshot.docs.map((doc) => (
       { id: doc.id, data: doc.data()}));
     
+    //obserbTimeをまずは数字に直す→stringなので、sortできない
+
+      const timeToMinutes = (timeStr:any) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+      };
+      
       let filteredCars = [];
-
-      for(let car of cars){
-        const filteredData=newData.filter(data => {
-          return data.data.carNo == car 
-        })
-        filteredCars.push(filteredData);
+      
+      for (let car of cars) {
+        const filteredData = newData.filter(data => data.data.carNo == car);
+      
+        // 文字列の時間を分に変換してからソート
+        const sortedData = filteredData.sort((a, b) => {
+          return timeToMinutes(a.data.obserbTime) - timeToMinutes(b.data.obserbTime);
+        });
+      
+        filteredCars.push(sortedData);
       }
-
-      // console.log(filteredCars)
-      setData(filteredCars)
+      
+      // ソートされたデータで状態を更新
+      setData(filteredCars);
+      
   };
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -124,12 +191,22 @@ function App() {
         const querySnapshot = await getDocs(q);
         const newData = querySnapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() }));   
         
-          let filteredCars = [];
-          for(let car of cars){
-            const filteredData=newData.filter(data => {
-              return data.data.carNo == car 
-            })
-            filteredCars.push(filteredData);
+        const timeToMinutes = (timeStr:any) => {
+          const [hours, minutes] = timeStr.split(':').map(Number);
+          return hours * 60 + minutes;
+        };
+        
+        let filteredCars = [];
+        
+        for (let car of cars) {
+          const filteredData = newData.filter(data => data.data.carNo == car);
+        
+          // 文字列の時間を分に変換してからソート
+          const sortedData = filteredData.sort((a, b) => {
+            return timeToMinutes(a.data.obserbTime) - timeToMinutes(b.data.obserbTime);
+          });
+        
+          filteredCars.push(sortedData);
           }
           setData(filteredCars)
           })();
@@ -166,6 +243,7 @@ function App() {
                     value={inputDay}
                     format="YY/M/D"
                     onChange={(newValue) => setInputDay(newValue)}
+                    
                   />
                 </DemoContainer>
               </LocalizationProvider>
@@ -222,7 +300,7 @@ function App() {
             })}
 
               {data.map((carData, Index) => (
-              <Grid item sm={2.5}>
+              <Grid item sm={3}>
                     <h2>{cars[Index]}</h2>
                       <div key={Index}> 
                         {carData.map((item) => (
@@ -230,6 +308,7 @@ function App() {
                             <td>{item.data.obserbTime}</td>
                             <td>～</td>
                             <td>{item.data.obserbTime2}</td>
+                            <td>【{item.data.userName}】</td>
                             <td><Button size="large" variant="contained" color="success" 
                                 onClick={()=>deleteClick(item.id)}>削除</Button></td>
                           </tr>
