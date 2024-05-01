@@ -17,6 +17,11 @@ import { collection,addDoc,doc,query,getDocs,where,orderBy,setDoc} from "firebas
 import React from 'react';
 import {db} from './firebase'
 import StickyHeadTable from  './component/table';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 interface ObservationData {
   id: string;
@@ -31,6 +36,8 @@ function App() {
   
   const [carNo, setCarNo] = useState('11号車(1111)');
   const [data, setData] = useState<any[][]>([]);
+  const [open, setOpen] = React.useState(false);
+  const [openId, setOpenId] = React.useState<string | null>(null);
 
   
   const [inputDay, setInputDay] = React.useState<Dayjs | null>(dayjs(today));
@@ -45,6 +52,7 @@ function App() {
     const inputDate=dayjs(inputDay).format("MM/DD")
     const inputStartTime=dayjs(startTime).format("HH:mm")
     const inputEndTime=dayjs(endTime).format("HH:mm")
+    setOpen(false);
 
     
   if(inputStartTime==inputEndTime){
@@ -181,6 +189,8 @@ function App() {
     );
     
     setData(newFilteredData);
+    setOpen(false);
+
   };
   
   useEffect(() => {
@@ -211,6 +221,16 @@ function App() {
           setData(filteredCars)
           })();
        }, [carNo,inputDate]);
+
+//ダイアログ用
+const handleClickOpen = (id: string) => {
+  setOpenId(id);
+};
+
+const handleClose = () => {
+  setOpenId(null);
+};
+
 
   
   return (
@@ -309,8 +329,33 @@ function App() {
                             <td>～</td>
                             <td>{item.data.obserbTime2}</td>
                             <td>【{item.data.userName}】</td>
-                            <td><Button size="large" variant="contained" color="success" 
-                                onClick={()=>deleteClick(item.id)}>削除</Button></td>
+
+                            <td>                           
+                            <Button variant="outlined" onClick={() => handleClickOpen(item.id)}>
+                              編集
+                            </Button>
+                                <Dialog
+                                  open={item.id === openId}
+                                  onClose={handleClose}
+                                  aria-labelledby="alert-dialog-title"
+                                  aria-describedby="alert-dialog-description"
+                                >
+                                  <DialogTitle id="alert-dialog-title">
+                                    {"Use Google's location service?"}
+                                  </DialogTitle>
+                                  <DialogContent>
+                                    <DialogContentText id="alert-dialog-description">
+                                      どうしますか？
+                                    </DialogContentText>
+                                  </DialogContent>
+                                  <DialogActions>
+                                    <Button onClick={handleClose}>開始時間変更</Button>
+                                    <Button onClick={handleClose} autoFocus>終了時間変更</Button>
+                                    <Button size="large" variant="contained" color="success" 
+                                     onClick={()=>deleteClick(item.id)}>削除</Button>
+                                  </DialogActions>
+                                </Dialog>
+                            </td>
                           </tr>
                         ))}
                       </div>
@@ -324,6 +369,8 @@ function App() {
       </Grid>
   );
 }
+
+export default App;
 
 export default App;
 
